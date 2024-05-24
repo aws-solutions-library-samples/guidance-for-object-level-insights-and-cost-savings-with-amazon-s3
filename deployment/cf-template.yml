@@ -5,22 +5,22 @@ Resources:
   ServerAccessLogsBucket:
     Type: 'AWS::S3::Bucket'
     Properties:
-      BucketName: !Join ['', ['sal-', !Select [0, !Split ['-', !Select [2, !Split ['/', !Ref 'AWS::StackId']]]]]]
+      BucketName: !Join ['', ['server-access-logs-bucket-', !Select [0, !Split ['-', !Select [2, !Split ['/', !Ref 'AWS::StackId']]]]]]
 
   InventoryReportsBucket:
     Type: 'AWS::S3::Bucket'
     Properties:
-      BucketName: !Join ['', ['inventory-', !Select [0, !Split ['-', !Select [2, !Split ['/', !Ref 'AWS::StackId']]]]]]
+      BucketName: !Join ['', ['inventory-bucket', !Select [0, !Split ['-', !Select [2, !Split ['/', !Ref 'AWS::StackId']]]]]]
 
   GlueJobBucket:
     Type: 'AWS::S3::Bucket'
     Properties:
-      BucketName: !Join ['', ['glue-job-', !Select [0, !Split ['-', !Select [2, !Split ['/', !Ref 'AWS::StackId']]]]]]
+      BucketName: !Join ['', ['glue-job-bucket-', !Select [0, !Split ['-', !Select [2, !Split ['/', !Ref 'AWS::StackId']]]]]]
 
   GlueJobRole: 
     Type: "AWS::IAM::Role"
     Properties: 
-      RoleName: "AWSGlueServiceRoleDefault"
+      RoleName: !Join ['', ['AWSGlueServiceRoleDefault-', !Select [0, !Split ['-', !Select [2, !Split ['/', !Ref 'AWS::StackId']]]]]]
       AssumeRolePolicyDocument: 
         Version: "2012-10-17"
         Statement: 
