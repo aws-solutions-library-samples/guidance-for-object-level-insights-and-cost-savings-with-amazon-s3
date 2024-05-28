@@ -2,17 +2,15 @@
 
 ## Table of Content
 
-1. [Overview](#overview-required)
+1. [Overview](#overview)
     - [Cost](#cost)
-2. [Prerequisites](#prerequisites-required)
-    - [Operating System](#operating-system-required)
-3. [Deployment Steps](#deployment-steps-required)
-4. [Deployment Validation](#deployment-validation-required)
-5. [Running the Guidance](#running-the-guidance-required)
-6. [Next Steps](#next-steps-required)
-7. [Cleanup](#cleanup-required)
-
-***Optional***
+2. [Prerequisites](#prerequisites)
+    - [Operating System](#operating-system)
+3. [Deployment Steps](#deployment-steps)
+4. [Deployment Validation](#deployment-validation)
+5. [Running the Guidance](#running-the-guidance)
+6. [Next Steps](#next-steps)
+7. [Cleanup](#cleanup)
 
 8. [FAQ, known issues, additional considerations, and limitations](#faq-known-issues-additional-considerations-and-limitations-optional)
 9. [Revisions](#revisions-optional)
@@ -52,7 +50,7 @@ Amazon S3 has multiple native functionalities included with it. You will be usin
 1. Include the architecture diagram image, as well as the steps explaining the high-level overview and flow of the architecture.
     - To add a screenshot, create an ‘assets/images’ folder in your repository and upload your screenshot to it. Then, using the relative file path, add it to your README.
 
-### Cost ( required )
+### Cost
 
 This section is for a high-level cost estimate. Think of a likely straightforward scenario with reasonable assumptions based on the problem the Guidance is trying to solve. Provide an in-depth cost breakdown table in this section below ( you should use AWS Pricing Calculator to generate cost breakdown ).
 
@@ -385,7 +383,6 @@ Provide suggestions and recommendations about how customers can modify the param
 
 <!-- ## FAQ, known issues, additional considerations, and limitations (optional)
 
-
 ### Known issues (optional)
 
 <If there are common known issues, or errors that can occur during the Guidance deployment, describe the issue and resolution steps here> -->
@@ -417,6 +414,6 @@ Include a legal disclaimer
 
 ## Authors
 
-Ajinkya Mehta, Associate Storage Specialist
-David Kilzer, Specialist SA Microsoft
-Jesse Bieber, Specialist SA Storage
+- Ajinkya Mehta, Associate Storage Specialist
+- David Kilzer, Specialist SA Microsoft
+- Jesse Bieber, Specialist SA Storage
