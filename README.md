@@ -384,7 +384,7 @@ Next step is to save the results for these queries by creating a view for analyz
 ![Quicksight View](/assets/images/1.8.png)
 *Figure 6*
 
-## Optional: Delete Objects in the bucket which have not been accessed in the last 90 days
+## Optional: Delete or Transition Objects in the Bucket Which Have not Been Accessed in the Last 90 Days
 
 1. Run the query below which fetches a list of all objects not accessed in 90 days ( it ignores recent puts too).
 
@@ -439,7 +439,7 @@ Next step is to save the results for these queries by creating a view for analyz
 
     - For Deletion: In the Mainbucket, go to management and create a lifecycle rule to expire current versions of objects after 0 days which have the following tags “delete” in key, “true” in value
 
-    - Step 5b: For Transition: In the Mainbucket, go to management and create a lifecycle rule to transition objects after 0 days which have the following tags “glacier” in key, “true” in value to whatever storage class you want to transition to
+    - For Transition: In the Mainbucket, go to management and create a lifecycle rule to transition objects after 0 days which have the following tags “glacier” in key, “true” in value to whatever storage class you want to transition to
 
     **S3 Lifecycle rule will act on all the objects with those tags and hence delete/transition the objects resulting in cost savings.**
 
