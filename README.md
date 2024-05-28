@@ -58,25 +58,24 @@ This section is for a high-level cost estimate. Think of a likely straightforwar
 
 Start this section with the following boilerplate text:
 
-_You are responsible for the cost of the AWS services used while running this Guidance. As of May 2024, the cost for running this Guidance with the default settings in the us-east-1 (N. Virginia) region is approximately $<n.nn> per month for processing ( <nnnnn> records ).
+_You are responsible for the cost of the AWS services used while running this Guidance. As of May 2024, the cost for running this Guidance with the default settings in the us-east-1 (N. Virginia) region is approximately $544 per month for processing. Refer to the cost table below.
 
-Replace this amount with the approximate cost for running your Guidance in the default Region. This estimate should be per month and for processing/serving resonable number of requests/entities.
+We recommend creating a [Budget](https://docs.aws.amazon.com/cost-management/latest/userguide/budgets-managing-costs.html) through [AWS Cost Explorer](https://aws.amazon.com/aws-cost-management/aws-cost-explorer/) to help manage costs. Prices are subject to change. For full details, refer to the pricing webpage for each AWS service used in this Guidance.
 
-Suggest you keep this boilerplate text:
-_We recommend creating a [Budget](https://docs.aws.amazon.com/cost-management/latest/userguide/budgets-managing-costs.html) through [AWS Cost Explorer](https://aws.amazon.com/aws-cost-management/aws-cost-explorer/) to help manage costs. Prices are subject to change. For full details, refer to the pricing webpage for each AWS service used in this Guidance._
+### Sample Cost Table
 
-### Sample Cost Table ( required )
-
-**Note : Once you have created a sample cost table using AWS Pricing Calculator, copy the cost breakdown to below table and upload a PDF of the cost estimation on BuilderSpace.**
-
-The following table provides a sample cost breakdown for deploying this Guidance with the default parameters in the US East (N. Virginia) Region for one month.
+The following table provides a sample cost breakdown for deploying this Guidance in the US East (N. Virginia) region for one month.
 
 | AWS service  | Dimensions | Cost [USD] |
 | ----------- | ------------ | ------------ |
-| Amazon API Gateway | 1,000,000 REST API calls per month  | $ 3.50month |
-| Amazon Cognito | 1,000 active users per month without advanced security feature | $ 0.00 |
+| AWS Glue | 100 DPU's, 1 hour  | $88 / run |
+| Amazon S3 Server Access Logs | 1TB bucket size | $23.00 / month |
+| Amazon S3 Inventory | 100GB bucket size  | $28 / month |
+| Amazon Athena | Querying 20TB of data   | $100 / run |
+| Amazon QuickSight | 1 region, 1 author | $284 / month |
+| Amazon S3 Batch Operations | 20 million objects  | $ 21 / run |
 
-## Prerequisites (required)
+## Prerequisites
 
 The following prerequisites are required to deploy this solution:
 
@@ -85,7 +84,7 @@ The following prerequisites are required to deploy this solution:
 - Console access to Amazon Athena.
 - Console access to Amazon Glue.
 
-### Operating System (required)
+### Operating System
 
 These deployment instructions are optimized to be run in the AWS Console on a chromium based browser or Firefox and the AWS CLI. If running through the Windows Powershell or another browser, additional steps may be required.
 
@@ -104,35 +103,22 @@ These deployment instructions are optimized to be run in the AWS Console on a ch
     - An S3 buckets for Inventory, Server Access Logs, and a AWS Glue job
     - A service role for the Glue job to grant it permissions access resources in S3 and perform its job.
 
-<!-- 2. Deploy resources from CloudFormation Stack.
+    Verify that the CloudFormation template deployed correctly by navigating to AWS CloudFormation and finding the stack named **s3-cost-optimize-stack**. The bucket names are found under the **outputs** tab.
 
-    - Navigate to AWS CloudFormation
-    - Click Create Stack (With new resources (Standard))
-    - Upload the **s3-cost-savings-cf-template.yml** template file under **Specify template**. Click Next
-    - Give the stack a name. It is recommended to name it **s3-cost-optimization-stack** or something similar to easily identify it. Click Next.
-    - Under stack options, leave everything as their defaults and click next.
-    - Review the stack options and click **Submit**.
-    - This will take a minute and will deploy three buckets:
-      - inventory - for inventory reports.
-      - sal - for access logs
-      - glue-job - required by the glue job script. -->
-
-<!-- **Add Picture Here** -->
-
-![Architecture Diagram](/assets/images/1.2.png)
+![Architecture Diagram](/assets/images/cf-deployed.png)
 
 3. Turn on Server Access Logs from your Source Bucket (Main Bucket).
 
     - Open your source bucket.
     - Navigate to **Properties -> Edit Server Access Logging -> Enable Server Access Logging**.
-    - Set the destination to your Sal bucket and add **SalOriginal** as a prefix. Ex: **s3://your-sal-bucket/SalOriginal/**  (This creates a folder inside your server access logs bucket and dumps reports in that prefix)
+    - Set the destination to your Sal bucket and add **SalOriginal** as a prefix. Ex: **s3://server-access-logs-bucket-{id}/SalOriginal/**  (This creates a folder inside your server access logs bucket and dumps reports in that prefix)
     - Select ([DestinationPrefix]/[YYYY]-[MM]-[DD]-[hh]-[mm]-[ss]-[UniqueString] ) log format and save changes
 
 4. Configure Inventory reports for Source Bucket to send to the inventory bucket.
 
     - Navigate to **Management -> Create Inventory configuration** in you source bucket.
     - Input configuration name and select this account if your inventory bucket is in the same account
-    - Input destination- **s3://inventory-bucket/InventoryReports** (This adds a prefix to the inventory reports generated in your bucket)
+    - Input destination- **s3://inventory-bucket-{id}/InventoryReports** (This adds a prefix to the inventory reports generated in your bucket)
     - Select daily frequency and Apache parquet output format (We recommend having inventory reports in Apache parquet format for better efficiency)
     - Enable the status
     - Select server-side encryption if your business requires it
@@ -146,7 +132,7 @@ These deployment instructions are optimized to be run in the AWS Console on a ch
     - In the Query editor, run the following DDL statement to create the s3_access_logs_db database: ( Note: It's a best practice to create the database in the same AWS Region as your S3 bucket.) (Athena may not allow you to run this query until you save the location for your query results, manually enter the query result location in settings for Athena).
 
         ```sql
-                create database s3_access_logs_db
+        create database s3_access_logs_db
         ```
 
     - Run the following statement to create the inventory table. Change the Location to the location of the hive folder in your inventory bucket destination. (Note: Hive folder creation will take 24-48 hours after turning on S3 Inventory Reports)
@@ -177,26 +163,26 @@ These deployment instructions are optimized to be run in the AWS Console on a ch
             ROW FORMAT SERDE 'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe'
             STORED AS INPUTFORMAT 'org.apache.hadoop.hive.ql.io.SymlinkTextInputFormat'
             OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.IgnoreKeyTextOutputFormat'
-            LOCATION 's3://inventory-{cf-id}}/<PathToInventoryReports>/hive/'
+            LOCATION 's3://inventory-bucket-{id}}/<PathToInventoryReports>/hive/'
         ```
   
   The inventory table and database are set up. Next is to configure access logs in Athena so we can query both the tables to get the desired outcome. For achieving the highest efficiency in terms of cost and scalability, we will use AWS Glue to convert server access logs from its original format (Loosely structured, space-separated, newline-delimited ) to Apache parquet format.
 
 6. Download and Initialize AWS Glue job from GitHub repo to convert format of server access logs to Apache Parquet.
 
-    -  Download the zip code from [https://github.com/awslabs/athena-glue-service-logs](https://github.com/awslabs/athena-glue-service-logs)
+    - Download the zip code from [https://github.com/awslabs/athena-glue-service-logs](https://github.com/awslabs/athena-glue-service-logs)
     - After downloading the folder, go to **scripts/example_glue_jobs** and make changes to the **S3_CONVERTED_TARGET** and **S3_SOURCE_LOCATION** to set your parquet destination and source location:
 
-          ```json
-          "s3_access": {
-                  "s3_access": {
-                  "JOB_NAME_BASE": "S3Access",
-                  "RAW_TABLE_NAME":"s3_access_raw_logs",
-                  "CONVERTED_TABLE_NAME":"s3_access",
-                  "S3_CONVERTED_TARGET":"s3://sal/SalParquet/",
-                  "S3_SOURCE_LOCATION":"s3://sal/SalOriginal/"
-              },
-          ```
+        ```json
+        "s3_access": {
+                "s3_access": {
+                "JOB_NAME_BASE": "S3Access",
+                "RAW_TABLE_NAME":"s3_access_raw_logs",
+                "CONVERTED_TABLE_NAME":"s3_access",
+                "S3_CONVERTED_TARGET":"s3://server-access-logs-bucket-{id}/SalParquet/",
+                "S3_SOURCE_LOCATION":"s3://server-access-logs-bucket-{id}/SalOriginal/"
+            },
+        ```
 
 7. Stage the Glue Job.
 
@@ -215,13 +201,13 @@ These deployment instructions are optimized to be run in the AWS Console on a ch
     - Navigate to the directory of the glue script.
     - Run the following commands in terminal (For Mac Users) once in the root directory for the unzipped folder. Update the RELEASE_BUCKET variable with the output of the glue job bucket in the CloudFormation stack outputs.:
 
-          ```shell
-          RELEASE_BUCKET=<glue-job-bucket-{cf-id}> make private_release  
-          ```
+        ```shell
+        RELEASE_BUCKET=glue-job-bucket-{id} make private_release  
+        ```
 
-          ```shell
-          RELEASE_BUCKET=glue-job-bucket-{cf-id} make create_job service=s3_access
-          ```
+        ```shell
+        RELEASE_BUCKET=glue-job-bucket-{id} make create_job service=s3_access
+        ```
 
       - Once all the above steps are completed, you should have a glue job created in your region in AWS Glue.
 
@@ -265,14 +251,12 @@ These deployment instructions are optimized to be run in the AWS Console on a ch
 
 ![Load Partitions](./assets/images/load-partitions.png)
 
-### Deployment Validation  (required)
+### Deployment Validation  
 
-If successful
+The following will be true if deployed successfully:
 
-**Examples:**
-
-* Open CloudFormation console and verify the status of the template with the name starting with xxxxxx.
-* If deployment is successful, you should see an three S3 buckets starting with the names **sal**, **inventory**, and **glue-job**.
+- The CloudFormation template will have the status of create complete, and you will see three S3 buckets starting with the names **server-access-logs-bucket-**, **inventory-bucket-**, and **glue-job-bucket-**.
+- The Glue Job ran successfully.
 
 ## Running the Guidance
 
@@ -282,102 +266,99 @@ If successful
 
 ## Athena Query1: Objects accessed in the last 90 days
 
-    ```sql
-    WITH latest_partition AS (
-        SELECT MAX(dt) value FROM s3_access_logs_db."myinventory$partitions"
-    ),
-    latest_inventory AS (
-        SELECT
-            key,
-            storage_class
-        FROM myinventory mi
-        INNER JOIN latest_partition lp ON mi.dt=lp.value   -- Hacky way of getting the latest partition for the inventory report. W/o using subquery
-    )
+```sql
+WITH latest_partition AS (
+    SELECT MAX(dt) value FROM s3_access_logs_db."myinventory$partitions"
+),
+latest_inventory AS (
+    SELECT
+        key,
+        storage_class
+    FROM myinventory mi
+    INNER JOIN latest_partition lp ON mi.dt=lp.value   -- Hacky way of getting the latest partition for the inventory report. W/o using subquery
+)
 
-    SELECT 
-          li.key,
-          bucket,
-          storage_class
-          
-        -- ,al.request_uria
-        ,al.operation
-        ,al.time
-        ,al.object_size
-    FROM latest_inventory li 
-    INNER JOIN  "aws_service_logs"."s3_access" al on li.key=al.key
-    WHERE (time > date_add('day', -90, date(now())) and operation='REST.GET.OBJECT')
-    OR (time > date_add('day', -90, date(now())) and operation='REST.PUT.OBJECT')
+SELECT 
+    li.key,
+    bucket,
+    storage_class
+    
+    -- ,al.request_uria
+    ,al.operation
+    ,al.time
+    ,al.object_size
+FROM latest_inventory li 
+INNER JOIN  "aws_service_logs"."s3_access" al on li.key=al.key
+WHERE (time > date_add('day', -90, date(now())) and operation='REST.GET.OBJECT')
+OR (time > date_add('day', -90, date(now())) and operation='REST.PUT.OBJECT')
 
-    ```
+```
 
 ## Athena Query2: Objects not accessed in the last 90 days
 
-    ```sql
-    WITH latest_partition AS (
-      SELECT MAX(dt) value FROM s3_access_logs_db."myinventory$partitions"
-    ),
-    latest_inventory AS (
-        SELECT key FROM myinventory mi
-        INNER JOIN latest_partition lp ON mi.dt=lp.value
+```sql
+WITH latest_partition AS (
+    SELECT MAX(dt) value FROM s3_access_logs_db."myinventory$partitions"
+),
+latest_inventory AS (
+    SELECT key FROM myinventory mi
+    INNER JOIN latest_partition lp ON mi.dt=lp.value
+)
+    SELECT  
+        key
+    FROM latest_inventory li 
+    WHERE EXISTS (
+        SELECT bl.*
+        FROM "aws_service_logs"."s3_access" bl
+        WHERE li.key = bl.key
+        AND operation IN ('REST.GET.OBJECT','REST.PUT.OBJECT')
+        AND time < date_add('day', -90, date(now()))
     )
-        SELECT  
-            key
-        FROM latest_inventory li 
-        WHERE EXISTS (
-            SELECT bl.*
-            FROM "aws_service_logs"."s3_access" bl
-            WHERE li.key = bl.key
-            AND operation IN ('REST.GET.OBJECT','REST.PUT.OBJECT')
-            AND time < date_add('day', -90, date(now()))
-        )
-        AND NOT EXISTS (
-            SELECT * 
-            FROM "aws_service_logs"."s3_access" bl
-            WHERE li.key = bl.key
-            AND operation IN ('REST.GET.OBJECT','REST.PUT.OBJECT')
-            AND time > date_add('day', -90, date(now()))
-        )
+    AND NOT EXISTS (
+        SELECT * 
+        FROM "aws_service_logs"."s3_access" bl
+        WHERE li.key = bl.key
+        AND operation IN ('REST.GET.OBJECT','REST.PUT.OBJECT')
+        AND time > date_add('day', -90, date(now()))
+    )
 
-    ```
+```
 
 ## Athena Query3: Objects deleted in the last 90 days
 
-    ```sql
-    SELECT DISTINCT mi.key
-        -- get keys for objects that were deleted in last 90 days
-        ,mi.bucket
-        ,mi.storage_class
-        
-        -- ,bl.request_uri
-        -- ,bl.operation
-        --,bl.time
-        -- ,bl.object_size
+```sql
+SELECT DISTINCT mi.key
+    -- get keys for objects that were deleted in last 90 days
+    ,mi.bucket
+    ,mi.storage_class
+    
+    -- ,bl.request_uri
+    -- ,bl.operation
+    --,bl.time
+    -- ,bl.object_size
 
-    from "aws_service_logs"."s3_access" bl
-    inner join  myinventory mi on bl.key=mi.key
-    WHERE (time > date_add('day', -90, date(now())) and operation='REST.DELETE.OBJECT')
-    ```
+from "aws_service_logs"."s3_access" bl
+inner join  myinventory mi on bl.key=mi.key
+WHERE (time > date_add('day', -90, date(now())) and operation='REST.DELETE.OBJECT')
+```
 
 ## Athena Query4: List of all objects
 
-    ```sql
-    WITH latest_partition AS (
-        SELECT MAX(dt) value FROM s3_access_logs_db."myinventory$partitions"
-    )
+```sql
+WITH latest_partition AS (
+    SELECT MAX(dt) value FROM s3_access_logs_db."myinventory$partitions"
+)
 
-        SELECT
-            key,
-            storage_class
-        FROM myinventory mi
-        INNER JOIN latest_partition lp ON mi.dt=lp.value   -- Hacky way of getting the latest partition for the inventory report. W/o using subquery
-    ```
+    SELECT
+        key,
+        storage_class
+    FROM myinventory mi
+    INNER JOIN latest_partition lp ON mi.dt=lp.value   -- Hacky way of getting the latest partition for the inventory report. W/o using subquery
+```
 
 ## Next Steps (required)
 
 Provide suggestions and recommendations about how customers can modify the parameters and the components of the Guidance to further enhance it according to their requirements.
-
-
-
 
 ## Cleanup
 
@@ -402,16 +383,15 @@ Provide suggestions and recommendations about how customers can modify the param
       - Select the deploy stack name "s3-cost-optimization"
       - Click **Delete**.
 
-
 ## FAQ, known issues, additional considerations, and limitations (optional)
 
 
-**Known issues (optional)**
+
+### Known issues (optional)
 
 <If there are common known issues, or errors that can occur during the Guidance deployment, describe the issue and resolution steps here>
 
-
-**Additional considerations (if applicable)**
+### Additional considerations (if applicable)
 
 <Include considerations the customer must know while using the Guidance, such as anti-patterns, or billing considerations.>
 
@@ -421,9 +401,7 @@ Provide suggestions and recommendations about how customers can modify the param
 - “This Guidance created an Amazon SageMaker notebook that is billed per hour irrespective of usage.”
 - “This Guidance creates unauthenticated public API endpoints.”
 
-
 Provide a link to the *GitHub issues page* for users to provide feedback.
-
 
 **Example:** *“For any feedback, questions, or suggestions, please use the issues tab under this repo.”*
 

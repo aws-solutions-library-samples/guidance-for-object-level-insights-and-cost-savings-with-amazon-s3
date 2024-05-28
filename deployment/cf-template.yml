@@ -10,7 +10,7 @@ Resources:
   InventoryReportsBucket:
     Type: 'AWS::S3::Bucket'
     Properties:
-      BucketName: !Join ['', ['inventory-bucket', !Select [0, !Split ['-', !Select [2, !Split ['/', !Ref 'AWS::StackId']]]]]]
+      BucketName: !Join ['', ['inventory-bucket-', !Select [0, !Split ['-', !Select [2, !Split ['/', !Ref 'AWS::StackId']]]]]]
 
   GlueJobBucket:
     Type: 'AWS::S3::Bucket'
