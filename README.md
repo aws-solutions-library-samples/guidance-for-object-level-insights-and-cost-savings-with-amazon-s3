@@ -12,10 +12,10 @@
 6. [Next Steps](#next-steps)
 7. [Cleanup](#cleanup)
 
-8. [FAQ, known issues, additional considerations, and limitations](#faq-known-issues-additional-considerations-and-limitations-optional)
-9. [Revisions](#revisions-optional)
-10. [Notices](#notices-optional)
-11. [Authors](#authors-optional)
+8. [FAQ, known issues, additional considerations, and limitations](#faq-known-issues-additional-considerations-and-limitations)
+9. [Revisions](#revisions)
+10. [Notices](#notices)
+11. [Authors](#authors)
 
 ## Overview
 
@@ -32,6 +32,7 @@ The objective of this solution is as follows:
 The high-level architecture for the project is as follows:
 
   ![Architecture Diagram](/assets/images/1.1.png)
+*Figure 1*
 
 The services used to create this architecture:
 
@@ -102,6 +103,7 @@ These deployment instructions are optimized to be run in the AWS Console on a ch
     Verify that the CloudFormation template deployed correctly by navigating to AWS CloudFormation and finding the stack named **s3-cost-optimize-stack**. The bucket names are found under the **outputs** tab.
 
 ![Architecture Diagram](/assets/images/cf-deployed.png)
+*Figure 2*
 
 3. Turn on Server Access Logs from your Source Bucket (Main Bucket).
 
@@ -240,12 +242,12 @@ These deployment instructions are optimized to be run in the AWS Console on a ch
     - Update both the tables by loading the partitions.Partitions need to be loaded on every new day in Athena to load new server access logs and inventory.
     - Click the three vertical dots icon in the particular table and select load partitions.
 
-    > [!NOTE]
-    > Make Sure to run “LOAD PARTITIONS” FOR THE “myinventory” table within the “s3_access_logs_db” database AND for the “s3_access” table within the “aws_service_logs” database each time you want to run analytics as new inventory and new server access logs need to be updated in Athena
+    *Note: Make Sure to run “LOAD PARTITIONS” FOR THE “myinventory” table within the “s3_access_logs_db” database AND for the “s3_access” table within the “aws_service_logs” database each time you want to run analytics as new inventory and new server access logs need to be updated in Athena*.
 
     You are ready to run the queries.
 
 ![Load Partitions](./assets/images/load-partitions.png)
+*Figure 3*
 
 ### Deployment Validation  
 
@@ -256,9 +258,9 @@ The following will be true if deployed successfully:
 
 ## Running the Guidance
 
-10. Run Athena queries to get the desired outcomes.
+Run Athena queries to get the desired outcomes.
 
-    The queries below will give us object level insights which S3 doesn’t provide at the moment. You can change the results in any of the queries to give you details about “X” days by simply replacing “90” in the codes below to your desired number of days.
+The queries below will give us object level insights which S3 doesn’t provide at the moment. You can change the results in any of the queries to give you details about “X” days by simply replacing “90” in the codes below to your desired number of days.
 
 ## Athena Query1: Objects accessed in the last 90 days
 
@@ -271,7 +273,7 @@ latest_inventory AS (
         key,
         storage_class
     FROM myinventory mi
-    INNER JOIN latest_partition lp ON mi.dt=lp.value   -- Hacky way of getting the latest partition for the inventory report. W/o using subquery
+    INNER JOIN latest_partition lp ON mi.dt=lp.value 
 )
 
 SELECT 
@@ -349,10 +351,99 @@ WITH latest_partition AS (
         key,
         storage_class
     FROM myinventory mi
-    INNER JOIN latest_partition lp ON mi.dt=lp.value   -- Hacky way of getting the latest partition for the inventory report. W/o using subquery
+    INNER JOIN latest_partition lp ON mi.dt=lp.value  
 ```
 
-## Next Steps (required)
+Please note the following:
+
+- You can change the number of days in any query by just replacing the -90 part with amount of days
+- You can add other metadata to the queries by adding the bucket alias + metadata name (for eg: mi.e_tag for etag metadata)
+
+## Visualize insights with Amazon Quicksight
+
+Next step is to save the results for these queries by creating a view for analyzing the data on QuickSight. Please follow the steps below:
+
+1. Go on each of the queries and select create view and name the view
+2. Open QuickSight console and select new analysis
+3. Once in new analysis please follow these steps, new dataset—Athena— MyAthenaDashboard
+4. Select your database and the view for Athena query 1 (Objects accessed in last 90 days) 
+5. Select Horizontal Chart bar with Storage class and key in y axis and Operations(count) in value. For Objects in respect to date requested, select Pivot Chart as the graph with key in rows and time in Columns ( Refer to Figure 3 below for other views)
+6. For Athena query 2 (objects not accessed in last 90 days) repeat steps 1-3
+7. Select your database and view for Athena query 2.
+8. Select horizontal bar chart to view Objects not accessed in last 30 days by storage class. Assign storage class and key to y-axis and key to value(Refer to Figure 4 below).
+9. For Athena query 3 (list of all objects) repeat steps 1-3
+10. Select your database and the view for Athena query 1 (List of all objects)
+11. Select horizontal bar chart to view list of objects by storage class and assign Storage class & key to y-axis and key to value (refer to figure 5 below)
+
+![Quicksight View](/assets/images/1.6.png)
+*Figure 4*
+
+![Quicksight View](/assets/images/1.7.png)
+*Figure 5*
+
+![Quicksight View](/assets/images/1.8.png)
+*Figure 6*
+
+## Optional: Delete Objects in the bucket which have not been accessed in the last 90 days
+
+1. Run the query below which fetches a list of all objects not accessed in 90 days ( it ignores recent puts too).
+
+    ```sql
+    WITH latest_partition AS (
+    SELECT MAX(dt) value FROM s3_access_logs_db."myinventory$partitions"
+    ),
+    latest_inventory AS (
+        SELECT
+        key,
+        bucket
+        FROM myinventory mi
+        INNER JOIN latest_partition lp ON mi.dt=lp.value
+    )
+        SELECT  
+        key,
+        bucket
+        FROM latest_inventory li 
+        WHERE EXISTS (
+            SELECT bl.*
+            FROM "aws_service_logs"."s3_access" bl
+            WHERE li.key = bl.key
+            AND operation IN ('REST.GET.OBJECT','REST.PUT.OBJECT')
+            AND time < date_add('day', -90, date(now()))
+        )
+        AND NOT EXISTS (
+            SELECT * 
+            FROM "aws_service_logs"."s3_access" bl
+            WHERE li.key = bl.key
+            AND operation IN ('REST.GET.OBJECT','REST.PUT.OBJECT')
+            AND time > date_add('day', -90, date(now()))
+        )
+    ```
+
+1. After you run the query, save the query and head over to the Athena Query saved results location to copy the path of the file.
+
+1. Tag all the objects that have not been accessed in last 90 days for deletion:
+
+   - On the AWS Console go to the Amazon S3 Batch operations and select your region
+   - Create a new job and paste the S3 url you copied above in Manifest object field
+   - Select replace all object tags and tag them as “delete” and “true” for key and value respectively and hit next
+   - Select a path to publish job results
+   - Configure an IAM role which allows Batch to access S3
+   - Create the job
+   - Once created, run the job
+
+*Note: The steps above will delete the objects, if the use case is for transition of objects to other storage classes, replace bullet #3 with the tags below and follow the rest as mentioned above.*
+
+Select replace all object tags and tag them as “glacier” and “true” for key and value respectively and hit next
+
+### Step 4: This job will tag all the objects in the bucket that have not been accessed in the last 90 days for deletion/transition. We will now create a lifecycle rule to delete all the objects that have been tagged for deletion/transition
+
+### Step 5a: For Deletion: In the Mainbucket, go to management and create a lifecycle rule to expire current versions of objects after 0 days which have the following tags “delete” in key, “true” in value
+
+### Step 5b: For Transition: In the Mainbucket, go to management and create a lifecycle rule to transition objects after 0 days which have the following tags “glacier” in key, “true” in value to whatever storage class you want to transition to
+
+### Step 6: S3 Lifecycle rule will act on all the objects with those tags and hence delete/transition the objects resulting in cost savings
+
+## Next Steps
 
 Provide suggestions and recommendations about how customers can modify the parameters and the components of the Guidance to further enhance it according to their requirements.
 
