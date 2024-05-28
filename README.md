@@ -383,42 +383,40 @@ Provide suggestions and recommendations about how customers can modify the param
       - Select the deploy stack name "s3-cost-optimization"
       - Click **Delete**.
 
-## FAQ, known issues, additional considerations, and limitations (optional)
-
+<!-- ## FAQ, known issues, additional considerations, and limitations (optional)
 
 
 ### Known issues (optional)
 
-<If there are common known issues, or errors that can occur during the Guidance deployment, describe the issue and resolution steps here>
+<If there are common known issues, or errors that can occur during the Guidance deployment, describe the issue and resolution steps here> -->
 
-### Additional considerations (if applicable)
+## Additional considerations
 
-<Include considerations the customer must know while using the Guidance, such as anti-patterns, or billing considerations.>
+The solution was tested using buckets with the following attributes.
 
-**Examples:**
+| AWS service  | Dimensions |
+| ----------- | ------------ |
+| Amazon S3 Main Bucket Size | 492 TB |
+| Amazon S3 Main Bucket Total Object Count | 2.1 billion |
+| Average Object Size | 219kb |
+| Server Access logs bucket size | 1 region, 1 author |
+| Server Access logs object count | 2.3TB  |
+| Total Records of Server access logs | 1.4million  |
 
-- “This Guidance creates a public AWS bucket required for the use-case.”
-- “This Guidance created an Amazon SageMaker notebook that is billed per hour irrespective of usage.”
-- “This Guidance creates unauthenticated public API endpoints.”
+For any feedback, questions, or suggestions, please use the issues tab under this repo: [https://github.com/AjinkyaAws/S3_CostSavings/issues](https://github.com/AjinkyaAws/S3_CostSavings/issues)
 
-Provide a link to the *GitHub issues page* for users to provide feedback.
+## Revisions
 
-**Example:** *“For any feedback, questions, or suggestions, please use the issues tab under this repo.”*
+- Initial Release.
 
-## Revisions (optional)
-
-Document all notable changes to this project.
-
-Consider formatting this section based on Keep a Changelog, and adhering to Semantic Versioning.
-
-## Notices (optional)
+## Notices
 
 Include a legal disclaimer
 
-**Example:**
 *Customers are responsible for making their own independent assessment of the information in this Guidance. This Guidance: (a) is for informational purposes only, (b) represents AWS current product offerings and practices, which are subject to change without notice, and (c) does not create any commitments or assurances from AWS and its affiliates, suppliers or licensors. AWS products or services are provided “as is” without warranties, representations, or conditions of any kind, whether express or implied. AWS responsibilities and liabilities to its customers are controlled by AWS agreements, and this Guidance is not part of, nor does it modify, any agreement between AWS and its customers.*
 
+## Authors
 
-## Authors (optional)
-
-Name of code contributors
+Ajinkya Mehta, Associate Storage Specialist
+David Kilzer, Specialist SA Microsoft
+Jesse Bieber, Specialist SA Storage
