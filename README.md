@@ -431,17 +431,17 @@ Next step is to save the results for these queries by creating a view for analyz
    - Create the job
    - Once created, run the job
 
-*Note: The steps above will delete the objects, if the use case is for transition of objects to other storage classes, replace bullet #3 with the tags below and follow the rest as mentioned above.*
+    *Note: The steps above will delete the objects, if the use case is for transition of objects to other storage classes, replace bullet #3 with the tags below and follow the rest as mentioned above.*
 
-Select replace all object tags and tag them as “glacier” and “true” for key and value respectively and hit next
+1. Select replace all object tags and tag them as “glacier” and “true” for key and value respectively and hit next
 
-### Step 4: This job will tag all the objects in the bucket that have not been accessed in the last 90 days for deletion/transition. We will now create a lifecycle rule to delete all the objects that have been tagged for deletion/transition
+1. This job will tag all the objects in the bucket that have not been accessed in the last 90 days for deletion/transition. We will now create a lifecycle rule to delete all the objects that have been tagged for deletion/transition
 
-### Step 5a: For Deletion: In the Mainbucket, go to management and create a lifecycle rule to expire current versions of objects after 0 days which have the following tags “delete” in key, “true” in value
+    - For Deletion: In the Mainbucket, go to management and create a lifecycle rule to expire current versions of objects after 0 days which have the following tags “delete” in key, “true” in value
 
-### Step 5b: For Transition: In the Mainbucket, go to management and create a lifecycle rule to transition objects after 0 days which have the following tags “glacier” in key, “true” in value to whatever storage class you want to transition to
+    - Step 5b: For Transition: In the Mainbucket, go to management and create a lifecycle rule to transition objects after 0 days which have the following tags “glacier” in key, “true” in value to whatever storage class you want to transition to
 
-### Step 6: S3 Lifecycle rule will act on all the objects with those tags and hence delete/transition the objects resulting in cost savings
+    **S3 Lifecycle rule will act on all the objects with those tags and hence delete/transition the objects resulting in cost savings.**
 
 ## Next Steps
 
