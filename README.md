@@ -1,4 +1,4 @@
-# Amazon S3 Object Level Insights & Cost Savings
+# Guidance for Amazon S3 Object Level Insights & Cost Savings on AWS
 
 ## Table of Content
 
