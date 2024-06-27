@@ -11,7 +11,6 @@
 5. [Running the Guidance](#running-the-guidance)
 6. [Next Steps](#next-steps)
 7. [Cleanup](#cleanup)
-
 8. [FAQ, known issues, additional considerations, and limitations](#faq-known-issues-additional-considerations-and-limitations)
 9. [Revisions](#revisions)
 10. [Notices](#notices)
