@@ -507,6 +507,6 @@ For any feedback, questions, or suggestions, please use the issues tab under thi
 
 ## Authors
 
-- Ajinkya Mehta, Associate Storage Specialist
-- David Kilzer, Specialist SA Microsoft
-- Jesse Bieber, Specialist SA Storage
+- Ajinkya Mehta, Specialist SA Storage
+- David Kilzer,  Specialist SA Microsoft
+- Jesse Bieber,  Specialist SA Storage
