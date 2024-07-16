@@ -491,9 +491,8 @@ The solution was tested using buckets with the following attributes.
 | Amazon S3 Main Bucket Size | 492 TB |
 | Amazon S3 Main Bucket Total Object Count | 2.1 billion |
 | Average Object Size | 219kb |
-| Server Access logs bucket size | 1 region, 1 author |
-| Server Access logs object count | 2.3TB  |
-| Total Records of Server access logs | 1.4million  |
+| Server Access logs bucket size | 2.2TB |
+| Server Access logs object count | 1.4million  |
 
 For any feedback, questions, or suggestions, please use the issues tab under this repo: [https://github.com/AjinkyaAws/S3_CostSavings/issues](https://github.com/AjinkyaAws/S3_CostSavings/issues)
 
