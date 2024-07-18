@@ -67,6 +67,7 @@ The following table provides a sample cost breakdown for deploying this Guidance
 | Amazon Athena | Querying 20TB of data   | $100 / run |
 | Amazon QuickSight | 1 region, 1 author | $284 / month |
 | Amazon S3 Batch Operations | 20 million objects  | $ 21 / run |
+| Total cost| $544 per month/run 
 
 ## Prerequisites
 
