@@ -268,6 +268,7 @@ The following will be true if deployed successfully:
 Run Athena queries to get the desired outcomes.
 
 The queries below will give us object level insights which S3 doesn’t provide at the moment. You can change the results in any of the queries to give you details about “X” days by simply replacing “90” in the codes below to your desired number of days.
+Please make sure to point the database to "s3_access_logs_db" to run the queries
 
 ## Athena Query1: Objects accessed in the last 90 days
 
