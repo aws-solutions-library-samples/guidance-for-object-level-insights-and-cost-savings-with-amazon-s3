@@ -143,7 +143,7 @@ Note: You can enable server access logs for the inventory reports and server acc
     - Run the following statement to create the inventory table. Change the Location to the location of the hive folder in your inventory bucket destination. (Note: Hive folder creation will take 24-48 hours after turning on S3 Inventory Reports)
 
         ```sql
-            CREATE EXTERNAL TABLE myinventory(
+            CREATE EXTERNAL TABLE `s3_access_logs_db.myinventory`(
                     bucket string,
                     key string,
                     version_id string,
