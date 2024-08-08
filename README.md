@@ -408,8 +408,8 @@ Next step is to save the results for these queries by creating a view for analyz
         INNER JOIN latest_partition lp ON mi.dt=lp.value
     )
         SELECT  
-        key,
-        bucket
+        bucket as "bucket_name"
+        key
         FROM latest_inventory li 
         WHERE EXISTS (
             SELECT bl.*
@@ -434,6 +434,7 @@ Next step is to save the results for these queries by creating a view for analyz
    - On the AWS Console go to the Amazon S3 Batch operations and select your region
    - Create a new job and paste the S3 url you copied above in Manifest object field
    - Select replace all object tags and tag them as “delete” and “true” for key and value respectively and hit next
+   - Make sure the format matches with the format S3 Batch operation needs to run the job ( https://docs.aws.amazon.com/AmazonS3/latest/userguide/batch-ops-create-job.html) 
    - Select a path to publish job results
    - Configure an IAM role which allows Batch to access S3
    - Create the job
