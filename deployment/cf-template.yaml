@@ -2,10 +2,10 @@ AWSTemplateFormatVersion: '2010-09-09'
 Description: 'CloudFormation template to create S3 buckets for server access logs and inventory reports'
 
 Resources:
-  ObjectInsightsBucket:
+  AccessLogsBucket:
     Type: 'AWS::S3::Bucket'
     Properties:
-      BucketName: !Join ['', ['s3-object-level-insights-bucket-', !Select [0, !Split ['-', !Select [2, !Split ['/', !Ref 'AWS::StackId']]]]]]
+      BucketName: !Join ['', ['server-access-logs-bucket-', !Select [0, !Split ['-', !Select [2, !Split ['/', !Ref 'AWS::StackId']]]]]]
       BucketEncryption:
         ServerSideEncryptionConfiguration:
           - ServerSideEncryptionByDefault:
@@ -22,39 +22,24 @@ Resources:
       Tags:
           - Key: 'Solution'
             Value: 'Amazon S3 Object Level Insights and Cost Savings'
-      # LoggingConfiguration:
-      #   DestinationBucketName: !Ref InsightsAccessLogsBucket
-      #   LogFilePrefix: 'insightsbucket-logs/'
-      #   TargetObjectKeyFormat: 
-      #     PartitionedPrefix: 
-      #          PartitionDateSource: EventTime
-
-
-  # InsightsAccessLogsBucket:
-  #   Type: 'AWS::S3::Bucket'
-  #   Properties:
-  #     BucketName: !Join ['', ['s3-object-level-insights-access-logs-bucket-', !Select [0, !Split ['-', !Select [2, !Split ['/', !Ref 'AWS::StackId']]]]]]
-  #     BucketEncryption:
-  #       ServerSideEncryptionConfiguration:
-  #         - ServerSideEncryptionByDefault:
-  #             SSEAlgorithm: AES256
-  #     LifecycleConfiguration:
-  #       Rules:
-  #         - Id: GlacierRule
-  #           Prefix: glacier
-  #           Status: Enabled
-  #           ExpirationInDays: 365
-  #           Transitions:
-  #             - TransitionInDays: 90
-  #               StorageClass: GLACIER
-  #     Tags:
-  #         - Key: 'Solution'
-  #           Value: 'Amazon S3 Object Level Insights and Cost Savings'
 
   InventoryReportsBucket:
     Type: 'AWS::S3::Bucket'
     Properties:
       BucketName: !Join ['', ['inventory-bucket-', !Select [0, !Split ['-', !Select [2, !Split ['/', !Ref 'AWS::StackId']]]]]]
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      LifecycleConfiguration:
+        Rules:
+          - Id: GlacierRule
+            Prefix: glacier
+            Status: Enabled
+            ExpirationInDays: 365
+            Transitions:
+              - TransitionInDays: 90
+                StorageClass: GLACIER
       Tags:
         - Key: 'Solution'
           Value: 'Amazon S3 Object Level Insights and Cost Savings'
@@ -74,7 +59,7 @@ Resources:
   SecureBucketPolicy:
     Type: 'AWS::S3::BucketPolicy'
     Properties:
-      Bucket: !Ref ObjectInsightsBucket
+      Bucket: !Ref AccessLogsBucket
       PolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -85,7 +70,7 @@ Resources:
             Resource: !Join
               - ''
               - - 'arn:aws:s3:::'
-                - !Ref ObjectInsightsBucket
+                - !Ref AccessLogsBucket
                 - /*
             Condition:
               Bool:
@@ -114,13 +99,13 @@ Resources:
 
 
 Outputs:
-  ObjectInsightsBucketName:
-    Value: !Ref ObjectInsightsBucket
+  AccessLogsBucketName:
+    Value: !Ref AccessLogsBucket
     Description: 'S3 Bucket for storing server access logs'
 
-  # InventoryReportsBucketName:
-  #   Value: !Ref InventoryReportsBucket
-  #   Description: 'S3 Bucket for storing inventory reports'
+  InventoryReportsBucketName:
+    Value: !Ref InventoryReportsBucket
+    Description: 'S3 Bucket for storing inventory reports'
 
   GlueJobBucketBucketName:
     Value: !Ref GlueJobBucket
