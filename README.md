@@ -67,6 +67,7 @@ The following table provides a sample cost breakdown for deploying this Guidance
 | Amazon Athena | Querying 20TB of data   | $100 / run |
 | Amazon QuickSight | 1 region, 1 author | $284 / month |
 | Amazon S3 Batch Operations | 20 million objects  | $ 21 / run |
+| Total cost| $544 per month/run 
 
 ## Prerequisites
 
@@ -142,7 +143,7 @@ Note: You can enable server access logs for the inventory reports and server acc
     - Run the following statement to create the inventory table. Change the Location to the location of the hive folder in your inventory bucket destination. (Note: Hive folder creation will take 24-48 hours after turning on S3 Inventory Reports)
 
         ```sql
-            CREATE EXTERNAL TABLE myinventory(
+            CREATE EXTERNAL TABLE `s3_access_logs_db.myinventory`(
                     bucket string,
                     key string,
                     version_id string,
@@ -267,6 +268,7 @@ The following will be true if deployed successfully:
 Run Athena queries to get the desired outcomes.
 
 The queries below will give us object level insights which S3 doesn’t provide at the moment. You can change the results in any of the queries to give you details about “X” days by simply replacing “90” in the codes below to your desired number of days.
+Please make sure to point the database to "s3_access_logs_db" to run the queries
 
 ## Athena Query1: Objects accessed in the last 90 days
 
@@ -406,8 +408,8 @@ Next step is to save the results for these queries by creating a view for analyz
         INNER JOIN latest_partition lp ON mi.dt=lp.value
     )
         SELECT  
-        key,
-        bucket
+        bucket as "bucket_name"
+        key
         FROM latest_inventory li 
         WHERE EXISTS (
             SELECT bl.*
@@ -432,6 +434,7 @@ Next step is to save the results for these queries by creating a view for analyz
    - On the AWS Console go to the Amazon S3 Batch operations and select your region
    - Create a new job and paste the S3 url you copied above in Manifest object field
    - Select replace all object tags and tag them as “delete” and “true” for key and value respectively and hit next
+   - Make sure the format matches with the format S3 Batch operation needs to run the job ( https://docs.aws.amazon.com/AmazonS3/latest/userguide/batch-ops-create-job.html) 
    - Select a path to publish job results
    - Configure an IAM role which allows Batch to access S3
    - Create the job
@@ -491,9 +494,8 @@ The solution was tested using buckets with the following attributes.
 | Amazon S3 Main Bucket Size | 492 TB |
 | Amazon S3 Main Bucket Total Object Count | 2.1 billion |
 | Average Object Size | 219kb |
-| Server Access logs bucket size | 1 region, 1 author |
-| Server Access logs object count | 2.3TB  |
-| Total Records of Server access logs | 1.4million  |
+| Server Access logs bucket size | 2.2TB |
+| Server Access logs object count | 1.4million  |
 
 For any feedback, questions, or suggestions, please use the issues tab under this repo: [https://github.com/AjinkyaAws/S3_CostSavings/issues](https://github.com/AjinkyaAws/S3_CostSavings/issues)
 
@@ -507,6 +509,6 @@ For any feedback, questions, or suggestions, please use the issues tab under thi
 
 ## Authors
 
-- Ajinkya Mehta, Associate Storage Specialist
-- David Kilzer, Specialist SA Microsoft
-- Jesse Bieber, Specialist SA Storage
+- Ajinkya Mehta, Specialist SA Storage
+- David Kilzer,  Specialist SA Microsoft
+- Jesse Bieber,  Specialist SA Storage
