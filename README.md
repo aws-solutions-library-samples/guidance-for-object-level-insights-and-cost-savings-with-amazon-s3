@@ -192,6 +192,10 @@ Note: You can enable server access logs for the inventory reports and server acc
             },
         ```
 
+    Ignore the `echo "s3_access service not found"` output. The Job creates as **LogMaster** under ETL Jobs.
+
+    ![Ignore Error](./assets/images/job-created.png)
+
 7. Stage the Glue Job.
 
     - Open Terminal (MacOs / Linux)
@@ -228,7 +232,7 @@ Note: You can enable server access logs for the inventory reports and server acc
       - Select Python3 as Language
       - Select G2X and 200 workers ( You can increase the number of workers to make job faster )
       - Enable Job Bookmark
-      - Select Advanced properties and fill in the information into Job Parameters shown below:
+      - Select Advanced properties and verify the information for Job Parameters filled matches what is below.:
 
         | Key                       | Value                                             |
         | ------------------------- | ------------------------------------------------- |
