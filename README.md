@@ -77,6 +77,7 @@ The following prerequisites are required to deploy this solution:
 - Console access to Amazon S3.
 - Console access to Amazon Athena.
 - Console access to Amazon Glue.
+- Access to the `make` command.
 
 ### Operating System
 
@@ -170,13 +171,15 @@ Note: You can enable server access logs for the inventory reports and server acc
             OUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.IgnoreKeyTextOutputFormat'
             LOCATION 's3://inventory-bucket-{id}}/<PathToInventoryReports>/hive/'
         ```
-  
-  The inventory table and database are set up. Next is to configure access logs in Athena so we can query both the tables to get the desired outcome. For achieving the highest efficiency in terms of cost and scalability, we will use AWS Glue to convert server access logs from its original format (Loosely structured, space-separated, newline-delimited ) to Apache parquet format.
+
+    The inventory table and database are set up. Next is to configure access logs in Athena so we can query both the tables to get the desired outcome. For achieving the highest efficiency in terms of cost and scalability, we will use AWS Glue to convert server access logs from its original format (Loosely structured, space-separated, newline-delimited ) to Apache parquet format.
 
 6. Download and Initialize AWS Glue job from GitHub repo to convert format of server access logs to Apache Parquet.
 
+    The following commands require the `make` command which is not available for Windows by default. Use MacOs, Linux, or WSL for Windows to run the commands, or use AWS CloudShell.
+
     - Download the zip code from [https://github.com/awslabs/athena-glue-service-logs](https://github.com/awslabs/athena-glue-service-logs)
-    - After downloading the folder, go to **scripts/example_glue_jobs** and make changes to the **S3_CONVERTED_TARGET** and **S3_SOURCE_LOCATION** to set your parquet destination and source location:
+    - After downloading the folder, rename the **scripts/example_glue_jobs** file to **scripts/glue_jobs.json** and make changes to the **S3_CONVERTED_TARGET** and **S3_SOURCE_LOCATION** to set your parquet destination and source location:
 
         ```json
         "s3_access": {
@@ -191,7 +194,7 @@ Note: You can enable server access logs for the inventory reports and server acc
 
 7. Stage the Glue Job.
 
-    - Open Terminal or Powershell
+    - Open Terminal (MacOs / Linux)
     - In the AWS Cli, make sure the AWS region is the same region is the same region where you created your S3 buckets; for example, if you created your buckets in us-east-1, then run the following command in terminal to set the region to us-east-1: ```export AWS_REGION=us-east-1```.
 
       Note: Your should have the the following policies:

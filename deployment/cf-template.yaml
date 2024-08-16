@@ -47,7 +47,7 @@ Resources:
   GlueJobBucket:
     Type: 'AWS::S3::Bucket'
     Properties:
-      BucketName: !Join ['', ['s3-object-level-insights-bucket-glue-job-bucket-', !Select [0, !Split ['-', !Select [2, !Split ['/', !Ref 'AWS::StackId']]]]]]
+      BucketName: !Join ['', ['glue-job-bucket-', !Select [0, !Split ['-', !Select [2, !Split ['/', !Ref 'AWS::StackId']]]]]]
       Tags:
         - Key: 'Solution'
           Value: 'Amazon S3 Object Level Insights and Cost Savings'
