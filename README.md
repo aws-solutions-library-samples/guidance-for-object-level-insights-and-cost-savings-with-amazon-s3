@@ -176,6 +176,9 @@ Note: You can enable server access logs for the inventory reports and server acc
 
 6. Download and Initialize AWS Glue job from GitHub repo to convert format of server access logs to Apache Parquet.
 
+    [!IMPORTANT]
+    The AthenaGlueServiceLogs repository has since been archived and will no longer receive updates. You are responsible for updating or managing this code.
+
     The following commands require the `make` command which is not available for Windows by default. Use MacOs, Linux, or WSL for Windows to run the commands, or use AWS CloudShell.
 
     - Download the zip code from [https://github.com/awslabs/athena-glue-service-logs](https://github.com/awslabs/athena-glue-service-logs)
@@ -506,7 +509,7 @@ The solution was tested using buckets with the following attributes.
 | Server Access logs bucket size | 2.2TB |
 | Server Access logs object count | 1.4million  |
 
-For any feedback, questions, or suggestions, please use the issues tab under this repo: [https://github.com/AjinkyaAws/S3_CostSavings/issues](https://github.com/AjinkyaAws/S3_CostSavings/issues)
+For any feedback, questions, or suggestions, please use the issues tab under this repo: [https://github.com/aws-solutions-library-samples/guidance-for-amazon-s3-object-level-insights-and-cost-savings/issues](https://github.com/aws-solutions-library-samples/guidance-for-amazon-s3-object-level-insights-and-cost-savings/issues)
 
 ## Revisions
 
