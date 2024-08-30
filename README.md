@@ -176,8 +176,7 @@ Note: You can enable server access logs for the inventory reports and server acc
 
 6. Download and Initialize AWS Glue job from GitHub repo to convert format of server access logs to Apache Parquet.
 
-    [!IMPORTANT]
-    The AthenaGlueServiceLogs repository has since been archived and will no longer receive updates. You are responsible for updating or managing this code.
+    :warning: **The AthenaGlueServiceLogs repository has since been archived and will no longer receive updates. You are responsible for updating or managing this code.**
 
     The following commands require the `make` command which is not available for Windows by default. Use MacOs, Linux, or WSL for Windows to run the commands, or use AWS CloudShell.
 
