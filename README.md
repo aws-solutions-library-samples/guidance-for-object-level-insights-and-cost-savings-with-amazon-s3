@@ -90,7 +90,7 @@ These deployment instructions are optimized to be run in the AWS Console on a ch
 2. Navigate to the deployment folder and run the following command to deploy the AWS CloudFormation template to run this solution.
 
     ```shell
-    aws cloudformation create-stack --stack-name s3-cost-optimize-stack --template-body file://cf-template.yml --capabilities CAPABILITY_NAMED_IAM
+    aws cloudformation create-stack --stack-name s3-cost-optimize-stack --template-body file://cf-template.yaml --capabilities CAPABILITY_NAMED_IAM
     ```
 
     It will deploy the following resources:
