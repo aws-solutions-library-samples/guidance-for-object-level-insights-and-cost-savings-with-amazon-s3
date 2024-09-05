@@ -11,7 +11,7 @@
 5. [Running the Guidance](#running-the-guidance)
 6. [Next Steps](#next-steps)
 7. [Cleanup](#cleanup)
-8. [FAQ, known issues, additional considerations, and limitations](#faq-known-issues-additional-considerations-and-limitations)
+8. [Additional considerations](#additional-considerations)
 9. [Revisions](#revisions)
 10. [Notices](#notices)
 11. [Authors](#authors)
@@ -67,7 +67,7 @@ The following table provides a sample cost breakdown for deploying this Guidance
 | Amazon Athena | Querying 20TB of data   | $100 / run |
 | Amazon QuickSight | 1 region, 1 author | $284 / month |
 | Amazon S3 Batch Operations | 20 million objects  | $ 21 / run |
-| Total cost| $544 per month/run 
+| Total cost| -- | $544 per month/run |
 
 ## Prerequisites
 
@@ -90,7 +90,7 @@ These deployment instructions are optimized to be run in the AWS Console on a ch
 2. Navigate to the deployment folder and run the following command to deploy the AWS CloudFormation template to run this solution.
 
     ```shell
-    aws cloudformation create-stack --stack-name s3-cost-optimize-stack --template-body file://cf-template.yml --capabilities CAPABILITY_NAMED_IAM
+    aws cloudformation create-stack --stack-name s3-cost-optimize-stack --template-body file://cf-template.yaml --capabilities CAPABILITY_NAMED_IAM
     ```
 
     It will deploy the following resources:
@@ -100,28 +100,32 @@ These deployment instructions are optimized to be run in the AWS Console on a ch
 
     Verify that the CloudFormation template deployed correctly by navigating to AWS CloudFormation and finding the stack named **s3-cost-optimize-stack**. The bucket names are found under the **outputs** tab.
 
-![Architecture Diagram](/assets/images/cf-deployed.png)
-*Figure 2*
+    ![Architecture Diagram](/assets/images/cf-deployed.png)
+    *Archtecture Diagram*
 
 3. Turn on Server Access Logs from your Source Bucket (Main Bucket).
 
     - Open your source bucket.
     - Navigate to **Properties -> Edit Server Access Logging -> Enable Server Access Logging**.
-    - Set the destination to your Sal bucket and add **SalOriginal** as a prefix. Ex: **s3://server-access-logs-bucket-{id}/SalOriginal/**  (This creates a folder inside your server access logs bucket and dumps reports in that prefix)
+    - Set the destination to your Sal bucket and add **SalOriginal** as a prefix. Ex: **s3://server-access-logs-bucket-{id}/SalOriginal/**  (This creates a folder inside your server access logs bucket and dumps reports in that prefix). `{id}` is the randomly generated suffix that is assigned to the bucket when deploying the cloudformation template.
     - Select ([DestinationPrefix]/[YYYY]-[MM]-[DD]-[hh]-[mm]-[ss]-[UniqueString] ) log format and save changes
+
+    ![Configure Server Access Logs](/assets/images/configure-sal.png)
 
 4. Configure Inventory reports for Source Bucket to send to the inventory bucket.
 
     - Navigate to **Management -> Create Inventory configuration** in you source bucket.
     - Input configuration name and select this account if your inventory bucket is in the same account
-    - Input destination- **s3://inventory-bucket-{id}/InventoryReports** (This adds a prefix to the inventory reports generated in your bucket)
-    - Select daily frequency and Apache parquet output format (We recommend having inventory reports in Apache parquet format for better efficiency)
+    - Input destination - **s3://inventory-bucket-{id}/InventoryReports** (This adds a prefix to the inventory reports generated in your bucket for organization). `{id}` is the randomly generated suffix that is assigned to the bucket when deploying the cloudformation template.
+    - Select daily frequency and Apache parquet output format (We recommend having inventory reports in Apache parquet format as this resulted in better efficiency during our testing.)
     - Enable the status
     - Select server-side encryption if your business requires it
     - Select metadata fields as required (We recommend having everything turned on)
     - Save the configuration
 
-Note: You can enable server access logs for the inventory reports and server access logs buckets if required.
+    ![Configure Server Access Logs](/assets/images/configure-inventory-report.png)
+
+    Note: You can enable server access logs for the inventory reports and server access logs buckets if required.
 
 5. Initialize a database and inventory table in Athena
 
@@ -134,14 +138,13 @@ Note: You can enable server access logs for the inventory reports and server acc
 
         ![Athena Settings](./assets/images/set-athena-settings.png)
 
-
     - In the Query editor, run the following DDL statement to create the s3_access_logs_db database: ( Note: It's a best practice to create the database in the same AWS Region as your S3 bucket.) (Athena may not allow you to run this query until you save the location for your query results, manually enter the query result location in settings for Athena).
 
         ```sql
         create database s3_access_logs_db
         ```
 
-    - Run the following statement to create the inventory table. Change the Location to the location of the hive folder in your inventory bucket destination. (Note: Hive folder creation will take 24-48 hours after turning on S3 Inventory Reports)
+    - Run the following statement to create the inventory table. Change the Location to the location of the hive folder in your inventory bucket destination. **(Note: A Hive folder is created 24-48 hours after turning on S3 Inventory Reports and is found in the location specified for inventory reports.)**
 
         ```sql
             CREATE EXTERNAL TABLE `s3_access_logs_db.myinventory`(
@@ -181,7 +184,8 @@ Note: You can enable server access logs for the inventory reports and server acc
     The following commands require the `make` command which is not available for Windows by default. Use MacOs, Linux, or WSL for Windows to run the commands, or use AWS CloudShell.
 
     - Download the zip code from [https://github.com/awslabs/athena-glue-service-logs](https://github.com/awslabs/athena-glue-service-logs)
-    - After downloading the folder, rename the **scripts/example_glue_jobs** file to **scripts/glue_jobs.json** and make changes to the **S3_CONVERTED_TARGET** and **S3_SOURCE_LOCATION** to set your parquet destination and source location:
+    - After downloading the folder, rename the **scripts/example_glue_jobs** file to **scripts/glue_jobs.json**.
+    - Update the s3_access section to change the **S3_CONVERTED_TARGET** and **S3_SOURCE_LOCATION** to set your parquet destination and source location. See below for an example.
 
         ```json
         "s3_access": {
@@ -194,16 +198,12 @@ Note: You can enable server access logs for the inventory reports and server acc
             },
         ```
 
-    Ignore the `echo "s3_access service not found"` output. The Job creates as **LogMaster** under ETL Jobs.
-
-    ![Ignore Error](./assets/images/job-created.png)
-
 7. Stage the Glue Job.
 
     - Open Terminal (MacOs / Linux)
     - In the AWS Cli, make sure the AWS region is the same region is the same region where you created your S3 buckets; for example, if you created your buckets in us-east-1, then run the following command in terminal to set the region to us-east-1: ```export AWS_REGION=us-east-1```.
 
-      Note: Your should have the the following policies:
+      Note: You must have the the following policies assigned to your role when using the AWS CLI:
 
         - AmazonS3FullAccess
         - AWSGlueConsoleFullAccess
@@ -212,8 +212,8 @@ Note: You can enable server access logs for the inventory reports and server acc
         - AWSGlueServiceRole
         - IAMUserChangePassword
 
-    - Navigate to the directory of the glue script.
-    - Run the following commands in terminal (For Mac Users) once in the root directory for the unzipped folder. Update the RELEASE_BUCKET variable with the output of the glue job bucket in the CloudFormation stack outputs.:
+    - Navigate to the root directory of the glue repository.
+    - Run the following commands in terminal (For Mac Users) once in the root directory for the unzipped folder. Update the RELEASE_BUCKET variable with the output of the glue job bucket in the CloudFormation stack outputs:
 
         ```shell
         RELEASE_BUCKET=glue-job-bucket-{id} make private_release  
@@ -223,9 +223,12 @@ Note: You can enable server access logs for the inventory reports and server acc
         RELEASE_BUCKET=glue-job-bucket-{id} make create_job service=s3_access
         ```
 
-      - Once all the above steps are completed, you should have a glue job created in your region in AWS Glue.
+    Note: `{id}` is the randomly generated suffix that is assigned to the bucket when deploying the cloudformation template.
 
-8.  Run the Job
+    - Once all the above steps are completed, you should have a glue job created in your region in AWS Glue.
+
+8. Run the Job
+
       - Go to **AWS Glue Console > Data Integration > ETL Jobs**
       - Open the created job.
       - Select **AWSGlueServiceRoleDefault-{cf-id}** as the IAM role for this job.
@@ -245,13 +248,15 @@ Note: You can enable server access logs for the inventory reports and server acc
         | --s3_converted_target     | s3://server-access-logs-bucket-{id}/sal-parquet/  |
         | --s3_source_location      | s3://server-access-logs-bucket-{id}/sal-original/ |
 
- Be sure to change the values for S3 converted target and s3 source location to point to your environment details.
+    Be sure to change the values for S3 converted target and s3 source location to point to your environment details.
 
- Save and run the job.
+    ![Job Parameters](./assets/images/glue-job-parameters.png)
 
- Now we have set up both server access logs and inventory reports set up in Amazon Athena.
+    Save and run the job.
 
- 9. View Server Access logs.
+    Now we have set up both server access logs and inventory reports set up in Amazon Athena.
+
+9. View Server Access logs.
 
     - Navigate to AWS Athena.
     - Change the database in Amazon Athena console to the glue database which was just created and updated.
@@ -262,8 +267,8 @@ Note: You can enable server access logs for the inventory reports and server acc
 
     You are ready to run the queries.
 
-![Load Partitions](./assets/images/load-partitions.png)
-*Figure 3*
+    ![Load Partitions](./assets/images/load-partitions.png)
+    *Load Partitions*
 
 ### Deployment Validation  
 
@@ -385,23 +390,23 @@ Next step is to save the results for these queries by creating a view for analyz
 1. Go on each of the queries and select create view and name the view
 2. Open QuickSight console and select new analysis
 3. Once in new analysis please follow these steps, new dataset—Athena— MyAthenaDashboard
-4. Select your database and the view for Athena query 1 (Objects accessed in last 90 days) 
-5. Select Horizontal Chart bar with Storage class and key in y axis and Operations(count) in value. For Objects in respect to date requested, select Pivot Chart as the graph with key in rows and time in Columns ( Refer to Figure 3 below for other views)
+4. Select your database and the view for Athena query 1 (Objects accessed in last 90 days)
+5. Select Horizontal Chart bar with Storage class and key in y axis and Operations(count) in value. For Objects in respect to date requested, select Pivot Chart as the graph with key in rows and time in Columns (Refer to Figure 1 below for other views)
 6. For Athena query 2 (objects not accessed in last 90 days) repeat steps 1-3
 7. Select your database and view for Athena query 2.
-8. Select horizontal bar chart to view Objects not accessed in last 30 days by storage class. Assign storage class and key to y-axis and key to value(Refer to Figure 4 below).
+8. Select horizontal bar chart to view Objects not accessed in last 30 days by storage class. Assign storage class and key to y-axis and key to value (Refer to Figure 2 below).
 9. For Athena query 3 (list of all objects) repeat steps 1-3
 10. Select your database and the view for Athena query 1 (List of all objects)
-11. Select horizontal bar chart to view list of objects by storage class and assign Storage class & key to y-axis and key to value (refer to figure 5 below)
+11. Select horizontal bar chart to view list of objects by storage class and assign Storage class & key to y-axis and key to value (refer to figure 4 below)
 
 ![Quicksight View](/assets/images/1.6.png)
-*Figure 4*
+*Quicksite Figure 1*
 
 ![Quicksight View](/assets/images/1.7.png)
-*Figure 5*
+*Quicksite Figure 2*
 
 ![Quicksight View](/assets/images/1.8.png)
-*Figure 6*
+*Quicksite Figure 3*
 
 ## Optional: Delete or Transition Objects in the Bucket Which Have not Been Accessed in the Last 90 Days
 
@@ -445,7 +450,7 @@ Next step is to save the results for these queries by creating a view for analyz
    - On the AWS Console go to the Amazon S3 Batch operations and select your region
    - Create a new job and paste the S3 url you copied above in Manifest object field
    - Select replace all object tags and tag them as “delete” and “true” for key and value respectively and hit next
-   - Make sure the format matches with the format S3 Batch operation needs to run the job ( https://docs.aws.amazon.com/AmazonS3/latest/userguide/batch-ops-create-job.html) 
+   - Make sure the format matches with the format S3 Batch operation needs to run the job. More information can be found [Here](https://docs.aws.amazon.com/AmazonS3/latest/userguide/batch-ops-create-job.html).
    - Select a path to publish job results
    - Configure an IAM role which allows Batch to access S3
    - Create the job
