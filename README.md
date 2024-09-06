@@ -248,9 +248,10 @@ These deployment instructions are optimized to be run in the AWS Console on a ch
         | --s3_converted_target     | s3://server-access-logs-bucket-{id}/sal-parquet/  |
         | --s3_source_location      | s3://server-access-logs-bucket-{id}/sal-original/ |
 
-    Be sure to change the values for S3 converted target and s3 source location to point to your environment details.
+    Confirm the values for S3 converted target and s3 source location to point to your environment details.
 
     ![Job Parameters](./assets/images/glue-job-parameters.png)
+    *Job Parameters*
 
     Save and run the job.
 
