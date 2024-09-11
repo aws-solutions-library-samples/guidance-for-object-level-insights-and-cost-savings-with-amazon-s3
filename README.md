@@ -103,7 +103,7 @@ These deployment instructions are optimized to be run in the AWS Console on a ch
     ![Architecture Diagram](/assets/images/cf-deployed.png)
     *Archtecture Diagram*
 
-3. Turn on Server Access Logs from your Source Bucket (Main Bucket).
+3. Turn on Server Access Logs from your Source Bucket (Main Bucket)
 
     - Open your source bucket.
     - Navigate to **Properties -> Edit Server Access Logging -> Enable Server Access Logging**.
