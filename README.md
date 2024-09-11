@@ -471,7 +471,7 @@ Next step is to save the results for these queries by creating a view for analyz
 
 ## Next Steps
 
-Provide suggestions and recommendations about how customers can modify the parameters and the components of the Guidance to further enhance it according to their requirements.
+You can customize the query parameters to fine-tune the results. Adjusting the number of days will help tailor the outputs to better suit your specific needs.
 
 ## Cleanup
 
