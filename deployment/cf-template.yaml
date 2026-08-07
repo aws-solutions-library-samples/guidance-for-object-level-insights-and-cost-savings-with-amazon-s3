@@ -67,11 +67,9 @@ Resources:
             Effect: Deny
             Principal: '*'
             Action: 's3:*'
-            Resource: !Join
-              - ''
-              - - 'arn:aws:s3:::'
-                - !Ref AccessLogsBucket
-                - /*
+            Resource:
+              - !Sub 'arn:aws:s3:::${AccessLogsBucket}'
+              - !Sub 'arn:aws:s3:::${AccessLogsBucket}/*'
             Condition:
               Bool:
                 'aws:SecureTransport': false
